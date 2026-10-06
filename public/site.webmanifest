@@ -1,0 +1,8 @@
+{
+  "name": "Avantix Labs",
+  "short_name": "Avantix",
+  "icons": [{ "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }, { "src": "favicon.svg", "type": "image/svg+xml", "sizes": "any" }],
+  "theme_color": "#F3F0E8",
+  "background_color": "#F3F0E8",
+  "display": "standalone"
+}
