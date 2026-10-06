@@ -16,7 +16,8 @@ html = html
   .replace(/<link rel="(icon|apple-touch-icon|manifest)"[^>]*>\s*/gi, '')
   .replace(/<meta property="og:image"[^>]*>\s*/i, '')
   .replace(title, '');
-html = `${title}\n${html.trim()}\n`;
+// the artifact gallery wants a short name; the real site keeps its longer SEO title
+html = `<title>Avantix Labs</title>\n${html.trim()}\n`;
 const out = new URL('../dist-single/avantix-labs.html', import.meta.url);
 writeFileSync(out, html);
 console.log(`artifact page: ${(html.length / 1024 / 1024).toFixed(2)} MB`);
