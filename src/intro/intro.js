@@ -382,7 +382,7 @@ export function runIntro({ onLight, onReveal, onFail, force = false }) {
   tl.add(introLogoTimeline(logoWrap.querySelector('svg')), T.logo);
   tl.add(() => flipToNav(logoWrap, navLogo), T.flip);
   tl.to(flashEl, { opacity: 0, duration: 0.95, ease: 'power2.inOut' }, T.flip + 0.1);
-  tl.add(() => onReveal(), T.flip + 0.2);
+  tl.add(() => onReveal(), T.flip + 0.5); // headline rises as the logo clears the centre
   tl.add(() => { cleanup(); finish(); }, T.done);
 
   /* ---------------------------------------------------------------- lightning */
