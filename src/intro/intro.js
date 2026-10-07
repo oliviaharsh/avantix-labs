@@ -168,7 +168,7 @@ function flipToNav(introLogo, navLogo, duration = 0.95) {
 }
 
 /* ------------------------------------------------------------------ main */
-export function runIntro({ onLight, onReveal, force = false }) {
+export function runIntro({ onLight, onReveal, onFail, force = false }) {
   const root = $('[data-intro]');
   const navLogo = $('[data-nav-logo]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -451,8 +451,12 @@ export function runIntro({ onLight, onReveal, force = false }) {
   addEventListener('resize', onResize);
 
   const look = new THREE.Vector3(0, -0.04, 0);
+  let failed = false;
   function frame(_t, deltaMs) {
-    if (stopped) return;
+    if (stopped || failed) return;
+    try { draw(deltaMs); } catch (err) { failed = true; tl.kill(); cleanup(); onFail?.(err); }
+  }
+  function draw(deltaMs) {
     const dt = Math.min(0.05, (deltaMs || 16) / 1000);
     const time = tl.time();
     U.uTime.value = time - T.ignite;
@@ -506,5 +510,5 @@ export function runIntro({ onLight, onReveal, force = false }) {
     gsap.ticker.add(frame);
     started = true;
     tl.play(0);
-  });
+  }).catch((err) => { cleanup(); onFail?.(err); });
 }

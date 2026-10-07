@@ -28,6 +28,18 @@
     "address": { "@type": "PostalAddress", "addressLocality": "Birmingham", "addressCountry": "GB" }
   }
   </script>
+  <script>
+    // Failsafe: the intro overlay only shows while JavaScript runs. If the app has not started
+    // within 8 seconds (blocked script, very old browser), remove it so the page is always visible.
+    document.documentElement.classList.add('js');
+    setTimeout(function () {
+      if (window.__avxBooted) return;
+      var intro = document.querySelector('[data-intro]');
+      if (intro) intro.parentNode.removeChild(intro);
+      document.body.classList.remove('is-locked', 'is-loading');
+      document.documentElement.classList.add('no-boot');
+    }, 8000);
+  </script>
 </head>
 <body class="is-loading">
   <a class="skip-link" href="#main">Skip to content</a>

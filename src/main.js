@@ -13,6 +13,7 @@ import { createHero } from './hero/hero.js';
 import { initUI, revealHero } from './lib/ui.js';
 import { initDemos } from './demos/index.js';
 
+window.__avxBooted = true; // tells the failsafe in index.html that the app started
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -36,13 +37,29 @@ const hero = createHero(document.querySelector('[data-hero-canvas]'));
 initUI({ lenis });
 initDemos();
 
-runIntro({
-  force: wantsIntro,
-  onLight: () => hero.start(),
-  onReveal: () => {
-    revealHero();
-    hero.reveal();
-    lenis.start();
-    ScrollTrigger.refresh();
-  },
-});
+let revealed = false;
+const reveal = () => {
+  if (revealed) return;
+  revealed = true;
+  revealHero();
+  hero.reveal();
+  lenis.start();
+  ScrollTrigger.refresh();
+};
+// if anything in the intro fails, go straight to the site rather than leave a dark screen
+const skipToSite = (err) => {
+  if (err) console.error('Intro failed, showing the site', err);
+  document.querySelector('[data-intro]')?.remove();
+  document.body.classList.remove('is-locked', 'is-loading');
+  const navLogo = document.querySelector('[data-nav-logo]');
+  if (navLogo) navLogo.style.visibility = 'visible';
+  hero.start();
+  reveal();
+};
+try {
+  runIntro({ force: wantsIntro, onLight: () => hero.start(), onReveal: reveal, onFail: skipToSite });
+} catch (err) {
+  skipToSite(err);
+}
+// last resort: never let the intro hold the page for more than 16 seconds
+setTimeout(() => { if (document.querySelector('[data-intro]')) skipToSite(new Error('intro timeout')); }, 16000);
