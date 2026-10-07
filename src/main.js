@@ -22,7 +22,9 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lenis = new Lenis({ lerp: reduce ? 1 : 0.09, smoothWheel: !reduce, wheelMultiplier: 0.95, anchors: { offset: -40 } });
 lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
-gsap.ticker.lagSmoothing(0);
+// during the intro, a slow frame should pause the story rather than skip part of it;
+// once smooth scrolling starts, Lenis wants lag smoothing off (see reveal below)
+gsap.ticker.lagSmoothing(500, 33);
 lenis.stop();
 window.__lenis = lenis;
 if (import.meta.env.DEV) window.__gsap = gsap;
@@ -43,6 +45,7 @@ const reveal = () => {
   revealed = true;
   revealHero();
   hero.reveal();
+  gsap.ticker.lagSmoothing(0);
   lenis.start();
   ScrollTrigger.refresh();
 };
@@ -57,7 +60,7 @@ const skipToSite = (err) => {
   reveal();
 };
 try {
-  runIntro({ force: wantsIntro, onLight: () => hero.start(), onReveal: reveal, onFail: skipToSite });
+  runIntro({ force: wantsIntro, onWarm: () => hero.warm(), onLight: () => hero.start(), onReveal: reveal, onFail: skipToSite });
 } catch (err) {
   skipToSite(err);
 }

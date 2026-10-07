@@ -168,7 +168,7 @@ function flipToNav(introLogo, navLogo, duration = 0.95) {
 }
 
 /* ------------------------------------------------------------------ main */
-export function runIntro({ onLight, onReveal, onFail, force = false }) {
+export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
   const root = $('[data-intro]');
   const navLogo = $('[data-nav-logo]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -506,7 +506,10 @@ export function runIntro({ onLight, onReveal, onFail, force = false }) {
   if (import.meta.env.DEV) window.__intro = { PP, THREE, gsap, tl, T, dbg, renderer, scene, camera, composer, S, started: () => started, at: (t) => { tl.pause(); tl.seek(t); }, play: () => tl.play() };
   fontReady.then(() => {
     document.body.classList.remove('is-loading');
+    // compile everything now, on the black loading screen, so nothing stalls once the story starts
+    onWarm?.();
     renderer.compile(scene, camera);
+    draw(16);
     gsap.ticker.add(frame);
     started = true;
     tl.play(0);

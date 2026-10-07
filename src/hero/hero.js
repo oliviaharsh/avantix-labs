@@ -79,7 +79,7 @@ const shaftVS = /* glsl */`
   void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 
 export function createHero(canvas) {
-  const noop = { start() {}, reveal() {} };
+  const noop = { start() {}, reveal() {}, warm() {} };
   if (!canvas) return noop;
   let renderer;
   try {
@@ -262,7 +262,21 @@ export function createHero(canvas) {
   }
   gsap.ticker.add(frame);
 
+  // Render one frame up front so every shader compiles and the shadow maps build while the
+  // intro screen is still black. Done later, the compile stalls the page mid-intro.
+  let warmed = false;
+  function warm() {
+    if (warmed) return;
+    warmed = true;
+    resize();
+    const was = [started, active];
+    started = true; active = true;
+    frame(0, 16);
+    [started, active] = was;
+  }
+
   return {
+    warm,
     start() {
       if (started) return;
       resize();
