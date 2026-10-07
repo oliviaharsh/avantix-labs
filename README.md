@@ -1,5 +1,8 @@
 # Avantix Labs website
 
+**Live preview:** https://oliviaharsh.github.io/avantix-labs/ (add `#intro` to replay the intro).
+Every push to `main` rebuilds and redeploys automatically (`.github/workflows/deploy.yml`).
+
 The studio's own site: a neural "idea" intro, a 3D sculpture of the Avantix mark in the hero, and a live demo for each of the eight services. Theme: **Sculpted Ivory** (ivory, limestone, espresso, bronze; Instrument Serif + Manrope). Logo: the Keystone kit in `src/assets/logo/`.
 
 ## Run it
@@ -24,6 +27,7 @@ Before launch, in the same file:
 | `formEndpoint` | Where the enquiry form posts (Formspree, Basin or your own API). While empty, the form tells the visitor nothing was sent. |
 | `bookingUrl` | A Cal.com or Calendly link for every "Book a call" button. Empty = scroll to the form. |
 | `showPrices` | Set to `false` to hide prices on the service chapters. |
+| `url` | The public address, used for link previews. Change it when the real domain is live. |
 
 ## How it is built
 

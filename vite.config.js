@@ -1,13 +1,24 @@
 import { defineConfig } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { renderSite } from './src/render/render.js';
+import { site } from './src/content/content.js';
 
 // Injects the build-time rendered markup into index.html (dev and build).
 const injectSite = () => ({
   name: 'avantix-render',
   transformIndexHtml: {
     order: 'pre',
-    handler: (html) => html.replace('<div id="app"></div>', renderSite()),
+    handler: (html) => {
+      let out = html.replace('<div id="app"></div>', renderSite());
+      if (site.url) {
+        // link previews (WhatsApp, LinkedIn, X) need absolute URLs
+        out = out
+          .replace('<meta property="og:image" content="og-image.png" />', `<meta property="og:image" content="${site.url}og-image.png" />
+  <meta property="og:url" content="${site.url}" />
+  <link rel="canonical" href="${site.url}" />`);
+      }
+      return out;
+    },
   },
 });
 

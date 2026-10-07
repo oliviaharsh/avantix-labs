@@ -3,6 +3,8 @@
 
 export const site = {
   name: 'Avantix Labs',
+  // Public address of the live site (used for link previews). Change when the real domain is ready.
+  url: 'https://oliviaharsh.github.io/avantix-labs/',
   location: 'Birmingham, UK',
   reach: 'Working with businesses across the UK and India.',
   // Paste a Formspree / Basin / your own endpoint here to make the enquiry form send.
