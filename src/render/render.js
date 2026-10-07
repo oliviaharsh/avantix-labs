@@ -37,6 +37,8 @@ const arrow = '<svg class="ico-arrow" viewBox="0 0 20 20" aria-hidden="true"><pa
 const arrowUpRight = '<svg class="ico-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 14 14 6M7.5 6H14v6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const pad = (n) => String(n).padStart(2, '0');
 const toneBg = { light: 'var(--ivory)', dark: 'var(--espresso)', stone: 'var(--limestone)' };
+// page links; Founders only while that section is switched on in content.js
+const links = [['services', 'Services'], ['work', 'Demos'], ['process', 'Process'], ...(site.showFounders ? [['founders', 'Founders']] : [])];
 
 /* ------------------------------------------------------------------ sections */
 function nav() {
@@ -44,17 +46,14 @@ function nav() {
 <header class="nav" data-nav>
   <a class="nav__logo" href="#top" aria-label="Avantix Labs, back to top" data-nav-logo>${logo.horizontal('nav__svg')}</a>
   <nav class="nav__links" aria-label="Main">
-    <a href="#services">Services</a>
-    <a href="#work">Demos</a>
-    <a href="#process">Process</a>
-    <a href="#founders">Founders</a>
+    ${links.map(([h, t]) => `<a href="#${h}">${t}</a>`).join('')}
   </nav>
   <a class="btn btn--bronze btn--sm nav__cta" href="#contact" data-book data-magnetic><span>Book a call</span>${arrowUpRight}</a>
   <button class="nav__menu" type="button" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><b class="sr-only">Menu</b></button>
 </header>
 <div class="mobile-menu" id="mobile-menu" hidden>
   <nav aria-label="Mobile">
-    ${['services:Services', 'work:Demos', 'process:Process', 'founders:Founders', 'contact:Contact'].map((s) => { const [h, t] = s.split(':'); return `<a href="#${h}">${t}</a>`; }).join('')}
+    ${[...links, ['contact', 'Contact']].map(([h, t]) => `<a href="#${h}">${t}</a>`).join('')}
   </nav>
 </div>`;
 }
@@ -72,7 +71,7 @@ function heroSection() {
     <h1 class="hero__title" data-split><span class="line">${esc(hero.titleA)}</span><span class="line"><em>Smarter</em> business.</span></h1>
     <p class="hero__sub" data-fade>${esc(hero.sub)}</p>
     <div class="hero__ctas" data-fade>
-      <a class="btn btn--bronze" href="#contact" data-book data-magnetic><span>Book a free 20-minute call</span>${arrow}</a>
+      <a class="btn btn--bronze" href="#contact" data-book data-magnetic><span>Book a free call</span>${arrow}</a>
       <a class="btn btn--ghost" href="#work" data-magnetic><span>See it working</span></a>
     </div>
   </div>
@@ -117,12 +116,13 @@ function marquee() {
 
 function chapter(s, i, prevTone) {
   const flip = i % 2 === 1 && !s.wide;
-  const plans = s.plans ? `<div class="plans">${s.plans.map((p) => `<div class="plan"><div><p class="plan__name">${esc(p.name)}</p><p class="plan__note">${esc(p.note)}</p></div><p class="plan__price">${esc(p.price)}<small>/month</small></p></div>`).join('')}</div>` : '';
-  const meta = site.showPrices ? `
+  const price = (p) => (site.showPrices ? `<p class="plan__price">${esc(p.price)}<small>/month</small></p>` : '');
+  const plans = s.plans ? `<div class="plans">${s.plans.map((p) => `<div class="plan"><div><p class="plan__name">${esc(p.name)}</p><p class="plan__note">${esc(p.note)}</p></div>${price(p)}</div>`).join('')}</div>` : '';
+  const meta = `
       <dl class="chapter__meta">
-        <div><dt>Price</dt><dd>${esc(s.price)}</dd></div>
+        ${site.showPrices ? `<div><dt>Price</dt><dd>${esc(s.price)}</dd></div>` : ''}
         <div><dt>${esc(s.timeLabel || 'Timeline')}</dt><dd>${esc(s.time)}</dd></div>
-      </dl>` : '';
+      </dl>`;
   return `
 <section class="chapter tone-${s.tone}${flip ? ' chapter--flip' : ''}${s.wide ? ' chapter--wide' : ''}" id="svc-${s.id}" data-tone="${s.tone}" style="--prev-bg:${toneBg[prevTone] || toneBg.light}" aria-labelledby="svc-${s.id}-title">
   <div class="chapter__inner">
@@ -232,14 +232,14 @@ function footer() {
     </nav>
     <nav class="footer__col" aria-label="Studio">
       <p class="eyebrow">Studio</p>
-      <a href="#work">Demos</a><a href="#process">Process</a><a href="#founders">Founders</a><a href="#contact">Contact</a>
+      ${[...links.slice(1), ['contact', 'Contact']].map(([h, t]) => `<a href="#${h}">${t}</a>`).join('')}
       <button type="button" class="footer__replay" data-replay>Replay the intro</button>
     </nav>
   </div>
   <div class="footer__mark" aria-hidden="true">${logo.mark('footer__bigmark')}</div>
   <div class="footer__base">
     <p>© ${site.year} ${esc(site.name)}. ${esc(site.location)}.</p>
-    <p>Founded by ${founders.map((f) => esc(f.name)).join(' and ')}.</p>
+    ${site.showFounders ? `<p>Founded by ${founders.map((f) => esc(f.name)).join(' and ')}.</p>` : ''}
   </div>
 </footer>`;
 }
@@ -248,6 +248,7 @@ function introOverlay() {
   return `
 <div class="intro" data-intro aria-hidden="true">
   <canvas class="intro__canvas" data-intro-canvas></canvas>
+  <div class="intro__vignette"></div>
   <div class="intro__captions">
     <p data-cap="0">An idea,</p>
     <p data-cap="1">connected,</p>
@@ -260,6 +261,20 @@ function introOverlay() {
     <button class="intro__skip" type="button" data-intro-skip>Skip intro</button>
   </div>
 </div>`;
+}
+
+// schema.org data for search engines, from the same content
+export function structuredData() {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: site.name,
+    description: 'Websites, 3D web experiences, booking systems, business automation, AI agents and custom software.',
+    ...(site.url ? { url: site.url } : {}),
+    ...(site.showFounders ? { founder: founders.map((f) => ({ '@type': 'Person', name: f.name })) } : {}),
+    address: { '@type': 'PostalAddress', addressLocality: 'Birmingham', addressCountry: 'GB' },
+  };
+  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
 }
 
 export function renderSite() {
@@ -276,7 +291,7 @@ export function renderSite() {
     services.map((s, i) => chapter(s, i, i === 0 ? 'light' : tones[i - 1])).join(''),
     '</div>',
     processSection(),
-    foundersSection(),
+    site.showFounders ? foundersSection() : '',
     contactSection(),
     '</main>',
     footer(),

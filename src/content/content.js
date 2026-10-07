@@ -13,7 +13,9 @@ export const site = {
   // Optional: a Cal.com or Calendly link for the "Book a call" buttons. Empty = scroll to the form.
   bookingUrl: '',
   email: '',
-  showPrices: true,
+  // Hidden for now. The prices and founder bios below are kept so either can come back with one switch.
+  showPrices: false,
+  showFounders: false,
   year: 2026,
 };
 
@@ -51,7 +53,7 @@ export const services = [
     price: 'Quoted per project',
     time: 'Scoped on a call',
     demo: 'product3d',
-    demoNote: 'Drag to rotate. Fictional manufacturer, concept product viewer.',
+    demoNote: 'Drag to rotate. Fictional audio brand, concept product viewer.',
     tone: 'dark',
   },
   {
@@ -131,13 +133,13 @@ export const services = [
     time: '2–4 weeks',
     demo: 'export',
     wide: true,
-    demoNote: 'Switch currency, add parts to a request for quote. Fictional manufacturer, example rates.',
+    demoNote: 'Switch currency, add products to a request for quote. Fictional textile exporter, example rates.',
     tone: 'light',
   },
 ];
 
 export const process = [
-  { name: 'Discovery call', text: 'Twenty minutes to understand your business and where time or money is leaking.' },
+  { name: 'Discovery call', text: 'A free, no-pressure call to understand your business and where time or money is leaking.' },
   { name: 'Proposal in 48 hours', text: 'A fixed price with three options, what is included and what is not.' },
   { name: 'Build', text: 'A staging link so you can watch it come together, with two rounds of revisions included.' },
   { name: 'Launch & care', text: 'We launch, train your team with a short video and keep everything running on a care plan.' },
@@ -161,7 +163,7 @@ export const founders = [
 
 export const contact = {
   title: ['Let’s build something', 'people remember.'],
-  sub: 'Book a free 20-minute call. Tell us what is slowing your business down and we will show you what we would build.',
+  sub: 'Book a free call. Tell us what is slowing your business down and we will show you what we would build.',
   budgets: ['Under £1k', '£1k–3k', '£3k–10k', '£10k+', 'Not sure yet'],
   timelines: ['As soon as possible', 'In 1–3 months', 'Just exploring'],
 };

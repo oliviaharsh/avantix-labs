@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // smooth scrolling, driven by GSAP's ticker so ScrollTrigger stays in sync
-const lenis = new Lenis({ lerp: reduce ? 1 : 0.09, smoothWheel: !reduce, wheelMultiplier: 0.95, anchors: { offset: -40 } });
+const lenis = new Lenis({ lerp: reduce ? 1 : 0.1, smoothWheel: !reduce, anchors: { offset: -40 } });
 lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 // during the intro, a slow frame should pause the story rather than skip part of it;
@@ -36,8 +36,24 @@ if (wantsIntro) { try { history.replaceState(null, '', location.pathname + locat
 window.scrollTo(0, 0);
 
 const hero = createHero(document.querySelector('[data-hero-canvas]'));
+const heroReady = hero.prepare(); // decode, compile and draw the shadows now, in the background
 initUI({ lenis });
-initDemos();
+const demos = initDemos();
+
+// Keep the scroll animations measured against the real page: if its height changes after load
+// (fonts, demos, a sent form), re-measure once scrolling has settled.
+let pageH = 0, remeasureTimer = 0;
+const remeasure = () => {
+  if (lenis.isScrolling) { remeasureTimer = setTimeout(remeasure, 250); return; }
+  ScrollTrigger.refresh();
+};
+new ResizeObserver(() => {
+  const h = document.documentElement.scrollHeight;
+  if (Math.abs(h - pageH) < 4) return;
+  pageH = h;
+  clearTimeout(remeasureTimer);
+  remeasureTimer = setTimeout(remeasure, 300);
+}).observe(document.body);
 
 let revealed = false;
 const reveal = () => {
@@ -48,6 +64,7 @@ const reveal = () => {
   gsap.ticker.lagSmoothing(0);
   lenis.start();
   ScrollTrigger.refresh();
+  setTimeout(() => demos.warm(), 3400); // once the hero has settled, prepare the demos in quiet moments
 };
 // if anything in the intro fails, go straight to the site rather than leave a dark screen
 const skipToSite = (err) => {
@@ -60,7 +77,7 @@ const skipToSite = (err) => {
   reveal();
 };
 try {
-  runIntro({ force: wantsIntro, onWarm: () => hero.warm(), onLight: () => hero.start(), onReveal: reveal, onFail: skipToSite });
+  runIntro({ force: wantsIntro, heroReady, onLight: () => hero.start(), onReveal: reveal, onFail: skipToSite });
 } catch (err) {
   skipToSite(err);
 }

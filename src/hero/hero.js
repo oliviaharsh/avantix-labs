@@ -1,14 +1,18 @@
 // Hero: the Avantix mark as a sculpture. The logo kit's own polygons are extruded into a travertine
 // monolith (thick stroke), a dark bronze beam set behind it (thin stroke) and a polished bronze bridge
-// (crossbar). Sunlight through a window, ambient occlusion, drifting dust. Scrolling swings the camera
-// round until, for a moment, the three pieces line up into the logo.
+// (crossbar). Sunlight through a window, drifting dust. Scrolling swings the camera round until, for a
+// moment, the three pieces line up into the logo.
+//
+// Built to stay smooth on ordinary laptops: drawn straight to the canvas (multisampling and tone
+// mapping in the materials, no post-processing chain), shadows drawn once because nothing that casts
+// them moves, the lighting environment pre-baked (src/lib/env.js), shaders compiled in the background,
+// and a governor that lowers the resolution if a frame takes too long on this GPU.
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import * as PP from 'postprocessing';
-import { N8AOPostPass } from 'n8ao';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { travertine, limestoneFloor, plaster } from './stone.js';
+import { studioEnvironment } from '../lib/env.js';
+import { createGovernor } from '../lib/gpu.js';
 
 // logo kit mark geometry (SVG units, y down)
 const SLAB = [[0, 193.1], [33.83, 193.1], [154.09, 15.71], [130.91, 0]];
@@ -40,6 +44,20 @@ function windowCookie() {
   const cols = 3, rows = 2, pad = 70, gap = 16;
   const w = (512 - pad * 2 - gap * (cols - 1)) / cols, h = (512 - pad * 2 - gap * (rows - 1)) / rows;
   for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) x.fillRect(pad + i * (w + gap), pad + j * (h + gap), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+// a soft warm halo for the moment the crossbar glows (stands in for bloom)
+function haloTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const x = c.getContext('2d');
+  const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,214,160,1)');
+  g.addColorStop(0.35, 'rgba(255,186,120,0.42)');
+  g.addColorStop(1, 'rgba(255,170,100,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 128, 128);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -79,31 +97,29 @@ const shaftVS = /* glsl */`
   void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 
 export function createHero(canvas) {
-  const noop = { start() {}, reveal() {}, warm() {} };
+  const noop = { prepare: () => Promise.resolve(), start() {}, reveal() {} };
   if (!canvas) return noop;
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', stencil: false });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', stencil: false });
   } catch (e) {
     canvas.closest('[data-hero]')?.classList.add('no-webgl');
     return noop;
   }
-  const small = Math.min(innerWidth, innerHeight) < 700 || (navigator.hardwareConcurrency || 8) <= 4;
-  const PR = Math.min(devicePixelRatio || 1, small ? 1.5 : 1.75);
-  renderer.setPixelRatio(PR);
+  renderer.debug.checkShaderErrors = import.meta.env.DEV; // the checks wait for each compile to finish
+  renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.shadowMap.autoUpdate = false; // nothing that casts a shadow moves: draw the shadow maps once
 
   const scene = new THREE.Scene();
   const WALL = new THREE.Color('#EDE7DB');
   scene.background = WALL;
   scene.fog = new THREE.Fog(WALL, 9, 22);
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environmentIntensity = 0.38;
 
   const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 60);
+  const small = Math.min(innerWidth, innerHeight) < 700;
 
   /* ---------------- sculpture */
   const sculpture = new THREE.Group();
@@ -166,7 +182,7 @@ export function createHero(canvas) {
   const dg = new THREE.BufferGeometry();
   dg.setAttribute('position', new THREE.BufferAttribute(dp, 3));
   dg.setAttribute('aRand', new THREE.BufferAttribute(dr, 1));
-  const dustU = { uTime: { value: 0 }, uPR: { value: PR } };
+  const dustU = { uTime: { value: 0 }, uPR: { value: 1 } };
   const dust = new THREE.Points(dg, new THREE.ShaderMaterial({ uniforms: dustU, vertexShader: dustVS, fragmentShader: dustFS, transparent: true, depthWrite: false }));
   dust.frustumCulled = false;
   scene.add(dust);
@@ -179,21 +195,11 @@ export function createHero(canvas) {
     m.scale.x = k + 0.6;
     scene.add(m);
   });
-
-  /* ---------------- post-processing */
-  const composer = new PP.EffectComposer(renderer, { frameBufferType: THREE.HalfFloatType });
-  composer.addPass(new PP.RenderPass(scene, camera));
-  let ao = null;
-  if (!small) {
-    ao = new N8AOPostPass(scene, camera, innerWidth, innerHeight);
-    Object.assign(ao.configuration, { aoRadius: 0.55, distanceFalloff: 0.35, intensity: 2.1, color: new THREE.Color('#2A2016'), halfRes: true, denoiseSamples: 6, aoSamples: 12 });
-    composer.addPass(ao);
-  }
-  const bloom = new PP.BloomEffect({ mipmapBlur: true, levels: 5, luminanceThreshold: 0.86, luminanceSmoothing: 0.12, intensity: 0.35, radius: 0.6 });
-  const tone = new PP.ToneMappingEffect({ mode: PP.ToneMappingMode.NEUTRAL });
-  const vignette = new PP.VignetteEffect({ darkness: 0.32, offset: 0.38 });
-  const smaa = new PP.SMAAEffect();
-  composer.addPass(new PP.EffectPass(camera, smaa, bloom, tone, vignette));
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTexture(), color: '#FFC98A', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  halo.position.set(0.17, 0.47, 0.05);
+  halo.scale.set(1.5, 0.62, 1);
+  halo.visible = false;
+  scene.add(halo);
 
   /* ---------------- camera rig, scroll & pointer */
   const target = new THREE.Vector3(0, 0.95, -0.1);
@@ -219,23 +225,25 @@ export function createHero(canvas) {
     });
   }
 
+  let cssW = 1, cssH = 1;
+  const governor = createGovernor(renderer, { onChange: () => resize() });
   function resize() {
-    const w = canvas.clientWidth || innerWidth, h = canvas.clientHeight || innerHeight;
-    renderer.setSize(w, h, false);
-    composer.setSize(w, h);
-    camera.aspect = w / h;
+    cssW = canvas.clientWidth || innerWidth; cssH = canvas.clientHeight || innerHeight;
+    const pr = governor.pixelRatio(cssW, cssH);
+    renderer.setPixelRatio(pr);
+    renderer.setSize(cssW, cssH, false);
+    dustU.uPR.value = pr;
+    camera.aspect = cssW / cssH;
     camera.updateProjectionMatrix();
   }
   addEventListener('resize', resize);
 
-  let active = false, started = false, time = 0;
-  const io = new IntersectionObserver(([e]) => { active = e.isIntersecting; }, { threshold: 0 });
+  let active = false, started = false, ready = false, time = 0;
+  const io = new IntersectionObserver(([e]) => { active = e.isIntersecting; if (!active) governor.pause(); }, { threshold: 0 });
   io.observe(canvas);
 
   const camPos = new THREE.Vector3();
-  function frame(_t, deltaMs) {
-    if (!started || !active || document.hidden) return;
-    const dt = Math.min(0.05, (deltaMs || 16) / 1000);
+  function draw(dt) {
     time += dt;
     ptr.sx += (ptr.x - ptr.sx) * dt * 2; ptr.sy += (ptr.y - ptr.sy) * dt * 2;
     // scroll: swing round to the front, where the pieces line up into the mark
@@ -249,37 +257,51 @@ export function createHero(canvas) {
     camera.position.copy(camPos);
     camera.lookAt(target);
     // frame: the sculpture sits right of the headline, then centres as the text leaves
-    const w = renderer.domElement.width / PR, h = renderer.domElement.height / PR;
     const wide = camera.aspect >= 1.1;
-    const shift = wide ? -0.17 * w * (1 - swing) * S.offset : 0;
-    const lift = wide ? 0 : (portrait ? 0.27 : 0.17) * h * (1 - swing * 0.5);
-    camera.setViewOffset(w, h, shift, lift, w, h);
+    const shift = wide ? -0.17 * cssW * (1 - swing) * S.offset : 0;
+    const lift = wide ? 0 : (portrait ? 0.27 : 0.17) * cssH * (1 - swing * 0.5);
+    camera.setViewOffset(cssW, cssH, shift, lift, cssW, cssH);
     sun.intensity = 3.1 * S.sun;
     windowLight.intensity = 26 * S.sun;
-    brightBronze.emissiveIntensity = S.glow + swing * 0.18;
+    const glow = S.glow + swing * 0.18;
+    brightBronze.emissiveIntensity = glow;
+    halo.visible = glow > 0.02;
+    halo.material.opacity = Math.min(1, glow * 0.45);
     dustU.uTime.value = time;
-    composer.render(dt);
+    renderer.render(scene, camera);
+  }
+  function frame(_t, deltaMs) {
+    if (!ready || !started || !active || document.hidden) return;
+    governor.begin();
+    draw(Math.min(0.05, (deltaMs || 16) / 1000));
+    governor.end(performance.now());
   }
   gsap.ticker.add(frame);
 
-  // Render one frame up front so every shader compiles and the shadow maps build while the
-  // intro screen is still black. Done later, the compile stalls the page mid-intro.
-  let warmed = false;
-  function warm() {
-    if (warmed) return;
-    warmed = true;
-    resize();
-    const was = [started, active];
-    started = true; active = true;
-    frame(0, 16);
-    [started, active] = was;
+  // Everything heavy happens here, before the hero is shown: the environment is decoded, the shaders
+  // compile on the GPU process's threads (the page keeps running), then one frame draws the shadows.
+  let preparing = null;
+  function prepare() {
+    preparing ||= (async () => {
+      resize();
+      scene.environment = await studioEnvironment();
+      camera.position.set(4, 1.5, 7); camera.lookAt(target);
+      if (renderer.compileAsync) await renderer.compileAsync(scene, camera);
+      renderer.shadowMap.needsUpdate = true;
+      draw(0.016);
+      ready = true;
+      canvas.classList.add('is-ready');
+    })().catch((err) => { console.error('Hero 3D failed', err); hero?.classList.add('no-webgl'); });
+    return preparing;
   }
+  renderer.domElement.addEventListener('webglcontextrestored', () => { renderer.shadowMap.needsUpdate = true; });
+  if (import.meta.env.DEV) window.__hero = { THREE, renderer, scene, camera, governor, S, floor, wall, resize };
 
   return {
-    warm,
+    prepare,
     start() {
       if (started) return;
-      resize();
+      prepare();
       started = true;
       active = true;
       S.sun = 1.25; S.r = 6.8; S.el = 0.26; S.az = 0.9;

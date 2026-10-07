@@ -2,9 +2,10 @@
 // the whole brain lights up, flashes to ivory, the logo forms and settles into the nav.
 import * as THREE from 'three';
 import * as PP from 'postprocessing';
-const { EffectComposer, RenderPass, EffectPass, BloomEffect, VignetteEffect, NoiseEffect, ToneMappingEffect, ToneMappingMode, BlendFunction } = PP;
+const { EffectComposer, RenderPass, EffectPass, BloomEffect, ToneMappingEffect, ToneMappingMode } = PP;
 import { gsap } from 'gsap';
 import { buildBrain } from './brain.js';
+import { compileComposer } from '../lib/gpu.js';
 
 const SEEN_KEY = 'avx-intro-seen';
 const T = { spark: 1.0, ignite: 2.35, alive: 4.35, flash: 5.85, light: 6.55, logo: 6.6, flip: 7.95, done: 9.0 };
@@ -168,7 +169,7 @@ function flipToNav(introLogo, navLogo, duration = 0.95) {
 }
 
 /* ------------------------------------------------------------------ main */
-export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
+export function runIntro({ onLight, onReveal, onFail, heroReady = Promise.resolve(), force = false }) {
   const root = $('[data-intro]');
   const navLogo = $('[data-nav-logo]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -191,6 +192,7 @@ export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
   if (!((seen && !force) || reduce)) {
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance', stencil: false, depth: true });
+      renderer.debug.checkShaderErrors = import.meta.env.DEV; // the checks wait for each compile to finish
     } catch (e) { renderer = null; }
   }
 
@@ -325,15 +327,12 @@ export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
   const dust = new THREE.Points(dg, pointsMaterial(dustU, 6));
   scene.add(dust);
 
-  // post-processing: bloom does the electricity
+  // post-processing: bloom does the electricity (the vignette is CSS, the film grain is the page's own)
   const composer = new EffectComposer(renderer, { frameBufferType: THREE.HalfFloatType });
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new BloomEffect({ mipmapBlur: true, levels: small ? 5 : 6, luminanceThreshold: 0.1, luminanceSmoothing: 0.35, intensity: 1.1, radius: 0.82 });
-  const vignette = new VignetteEffect({ darkness: 0.66, offset: 0.26 });
-  const grain = new NoiseEffect({ premultiply: true, blendFunction: BlendFunction.ADD });
-  grain.blendMode.opacity.value = 0.12;
   const tone = new ToneMappingEffect({ mode: ToneMappingMode.ACES_FILMIC });
-  composer.addPass(new EffectPass(camera, bloom, vignette, grain, tone));
+  composer.addPass(new EffectPass(camera, bloom, tone));
   composer.setSize(innerWidth, innerHeight);
 
   /* ---------------------------------------------------------------- state & timeline */
@@ -500,16 +499,18 @@ export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
   addEventListener('keydown', onKey);
   $('[data-intro-skip]', root).addEventListener('click', skip);
 
-  // start once the serif has loaded (captions), but never wait long
+  // Start once the serif has loaded (captions) and every shader of the intro and the hero has compiled
+  // in the background, so the story never stalls. On a first visit that is about a second of loading
+  // bar; later visits hit the browser's shader cache. Never wait more than a few seconds.
   const fontReady = document.fonts?.load ? Promise.race([document.fonts.load('italic 40px "Instrument Serif"'), new Promise((r) => setTimeout(r, 900))]) : Promise.resolve();
+  const waitAtMost = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
+  root.classList.add('is-preparing');
   const dbg = { frames: 0 };
   let started = false;
   if (import.meta.env.DEV) window.__intro = { PP, THREE, gsap, tl, T, dbg, renderer, scene, camera, composer, S, started: () => started, at: (t) => { tl.pause(); tl.seek(t); }, play: () => tl.play() };
-  fontReady.then(() => {
+  waitAtMost(Promise.all([fontReady, compileComposer(renderer, composer, scene, camera), heroReady]), 6000).then(() => {
     document.body.classList.remove('is-loading');
-    // compile everything now, on the black loading screen, so nothing stalls once the story starts
-    onWarm?.();
-    renderer.compile(scene, camera);
+    root.classList.remove('is-preparing');
     draw(16);
     gsap.ticker.add(frame);
     started = true;

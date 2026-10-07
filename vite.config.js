@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
-import { renderSite } from './src/render/render.js';
+import { renderSite, structuredData } from './src/render/render.js';
 import { site } from './src/content/content.js';
 
 // Injects the build-time rendered markup into index.html (dev and build).
@@ -9,7 +9,7 @@ const injectSite = () => ({
   transformIndexHtml: {
     order: 'pre',
     handler: (html) => {
-      let out = html.replace('<div id="app"></div>', renderSite());
+      let out = html.replace('<div id="app"></div>', renderSite()).replace('<!-- structured-data -->', structuredData());
       if (site.url) {
         // link previews (WhatsApp, LinkedIn, X) need absolute URLs
         out = out

@@ -4,6 +4,7 @@
 .no-boot .intro { display: none; }
 .intro[hidden] { display: none; }
 .intro__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.intro__vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse farthest-corner at 50% 46%, rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, .58) 100%); }
 .intro__captions { position: absolute; left: 0; right: 0; bottom: 17vh; text-align: center; pointer-events: none; }
 .intro__captions p {
   position: absolute; left: 0; right: 0;
@@ -22,12 +23,17 @@
 .intro__skip { font: 600 11px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: rgba(243, 240, 232, .62); padding: 12px 16px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(243, 240, 232, .16); transition: color .3s, box-shadow .3s; }
 .intro__skip:hover { color: var(--ivory); box-shadow: inset 0 0 0 1px rgba(243, 240, 232, .5); }
 .intro.is-light .intro__ui { opacity: 0; transition: opacity .3s; }
+/* while shaders compile in the background: an indeterminate bar */
+.intro.is-preparing .intro__load i { transform-origin: left; animation: intro-prep 1.15s cubic-bezier(.65, 0, .35, 1) infinite; }
+@keyframes intro-prep { from { transform: translateX(-40%) scaleX(.4); } to { transform: translateX(100%) scaleX(.4); } }
 
 /* ================================================================ hero */
 .hero { position: relative; height: 100svh; min-height: 640px; overflow: hidden; background: var(--ivory); isolation: isolate; }
 .hero__stage { position: absolute; inset: 0; z-index: 0; }
 .hero::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16vh; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, rgba(243, 240, 232, 0), var(--ivory)); }
-.hero__canvas { width: 100%; height: 100%; }
+.hero__canvas { width: 100%; height: 100%; opacity: 0; transition: opacity 1s var(--ease); }
+.hero__canvas.is-ready { opacity: 1; }
+.hero__stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse farthest-corner at 50% 50%, rgba(38, 28, 18, 0) 56%, rgba(38, 28, 18, .1) 76%, rgba(38, 28, 18, .3) 100%); }
 .hero__fallback {
   position: absolute; inset: 0; z-index: -1;
   background:
@@ -55,8 +61,8 @@
 .hero__bottom { position: absolute; z-index: 2; left: var(--gutter); bottom: 34px; padding-left: 16px; border-left: 1px solid rgba(25, 24, 20, .35); font: 600 10.5px/1.6 var(--sans); letter-spacing: .22em; text-transform: uppercase; color: rgba(25, 24, 20, .62); }
 .hero__scroll { position: absolute; z-index: 2; right: var(--gutter); bottom: 30px; display: flex; align-items: center; gap: 14px; font: 600 10.5px/1 var(--sans); letter-spacing: .22em; text-transform: uppercase; color: rgba(25, 24, 20, .62); }
 .hero__scroll i { position: relative; width: 1px; height: 42px; background: rgba(25, 24, 20, .18); overflow: hidden; }
-.hero__scroll i::after { content: ''; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--espresso); animation: drip 2.2s var(--ease-io) infinite; }
-@keyframes drip { to { top: 110%; } }
+.hero__scroll i::after { content: ''; position: absolute; left: 0; top: 0; width: 1px; height: 40%; background: var(--espresso); transform: translateY(-100%); animation: drip 2.2s var(--ease-io) infinite; }
+@keyframes drip { to { transform: translateY(275%); } }
 
 /* ================================================================ statement */
 .statement { background: var(--ivory); padding: clamp(120px, 22vh, 260px) var(--gutter); }
@@ -128,6 +134,7 @@
 .plan__price { font: 400 26px/1 var(--serif); white-space: nowrap; }
 .plan__price small { font: 500 12px var(--sans); color: var(--muted); margin-left: 3px; }
 .plan__note { margin-top: 6px; font-size: 12.5px; line-height: 1.5; color: var(--muted); max-width: 34ch; }
+.plan:not(:has(.plan__price)) .plan__note { max-width: 60ch; }
 /* wide chapters: words on top in two columns, the demo gets the full width */
 .chapter--wide .chapter__inner { grid-template-columns: minmax(0, 1fr); gap: clamp(36px, 5vw, 70px); }
 .chapter--wide .chapter__text { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(30px, 5vw, 90px); align-items: end; }
@@ -137,8 +144,11 @@
 .demo-stage { position: relative; transform-style: preserve-3d; will-change: transform; }
 .demo-cap { margin-top: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
 .demo-cap__live { display: inline-flex; align-items: center; gap: 8px; font: 600 10.5px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--acc); padding: 7px 11px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); }
-.demo-cap__live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 0 currentColor; animation: live 2s infinite; }
-@keyframes live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 60%, transparent); } 70%, 100% { box-shadow: 0 0 0 8px transparent; } }
+.demo-cap__live { position: relative; }
+.demo-cap__live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+/* the pulse is a scaled ring (transform and opacity only, so it never repaints) */
+.demo-cap__live::after { content: ''; position: absolute; left: 11px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: currentColor; opacity: 0; animation: live 2s infinite; }
+@keyframes live { 0% { transform: scale(1); opacity: .6; } 70%, 100% { transform: scale(3.6); opacity: 0; } }
 
 /* device frames shared by demos */
 .frame { position: relative; border-radius: 16px; background: var(--surface); box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 40px 80px -30px rgba(25, 24, 20, .45), 0 18px 36px -18px rgba(25, 24, 20, .3); overflow: hidden; }
