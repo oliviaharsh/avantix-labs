@@ -470,7 +470,7 @@ export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
     group.rotation.x = S.tilt + ptr.sy * 0.12 + Math.sin(time * 0.6) * 0.015;
     dust.rotation.y = time * 0.01;
     const portrait = camera.aspect < 1;
-    const dist = S.dist * (portrait ? 1 + (1 - camera.aspect) * 1.25 : 1);
+    const dist = S.dist * (portrait ? 1 + (1 - camera.aspect) * 2.3 : 1); // keep the whole brain in frame on phones
     camera.position.set(dist * 0.9, 0.36 + dist * 0.035, dist * 0.42);
     camera.lookAt(look);
     updateArcs(time);
