@@ -27,7 +27,7 @@ gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(500, 33);
 lenis.stop();
 window.__lenis = lenis;
-if (import.meta.env.DEV) window.__gsap = gsap;
+if (import.meta.env.DEV) { window.__gsap = gsap; window.__onGsap?.(gsap); } // dev only: lets the video recorder slow the clock
 
 // always start at the top; the intro is the front door
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -64,5 +64,10 @@ try {
 } catch (err) {
   skipToSite(err);
 }
-// last resort: never let the intro hold the page for more than 16 seconds
-setTimeout(() => { if (document.querySelector('[data-intro]')) skipToSite(new Error('intro timeout')); }, 16000);
+// last resort: if the intro is still on screen after 16 seconds and has stopped drawing, show the site
+const watchdog = () => {
+  if (!document.querySelector('[data-intro]')) return;
+  if (performance.now() - (window.__avxIntroAlive || 0) < 1500) { setTimeout(watchdog, 2000); return; }
+  skipToSite(new Error('intro stalled'));
+};
+setTimeout(watchdog, 16000);

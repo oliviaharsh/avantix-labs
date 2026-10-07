@@ -457,6 +457,7 @@ export function runIntro({ onLight, onReveal, onFail, onWarm, force = false }) {
     try { draw(deltaMs); } catch (err) { failed = true; tl.kill(); cleanup(); onFail?.(err); }
   }
   function draw(deltaMs) {
+    window.__avxIntroAlive = performance.now(); // read by the watchdog in main.js
     const dt = Math.min(0.05, (deltaMs || 16) / 1000);
     const time = tl.time();
     U.uTime.value = time - T.ignite;
