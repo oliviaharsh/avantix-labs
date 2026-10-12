@@ -253,3 +253,5 @@
   .chapter__meta div { padding-right: 18px; margin-right: 18px; }
   .hero__ctas .btn { height: 52px; padding: 0 20px; }
 }
+/* spam trap: hidden from people, filled in by bots */
+.form__trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }

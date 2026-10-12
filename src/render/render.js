@@ -209,6 +209,7 @@ function contactSection() {
         <label class="field"><span>Timeline</span><select id="f-timeline" name="timeline">${opts(contact.timelines)}</select></label>
       </div>
       <label class="field"><span>Anything else?</span><textarea id="f-message" name="message" rows="3" placeholder="What is slowing your business down?"></textarea></label>
+      <label class="form__trap" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"/></label>
       <div class="form__foot">
         <button class="btn btn--bronze" type="submit" data-magnetic><span>Send enquiry</span>${arrow}</button>
         <p class="form__status" role="status" aria-live="polite" data-form-status></p>

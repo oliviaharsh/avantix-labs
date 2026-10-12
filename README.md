@@ -26,7 +26,7 @@ Before launch, in the same file:
 
 | Setting | What it does |
 |---|---|
-| `formEndpoint` | Where the enquiry form posts (Formspree, Basin or your own API). While empty, the form tells the visitor nothing was sent. |
+| `formEndpoint` | Where the enquiry form posts. Set to the Google Apps Script in `scripts/enquiry-apps-script.gs` (bound to the "Avantix Labs enquiries" Sheet in Harsh's Google account): each enquiry is added to the Sheet and emailed to Harsh and Parth, reply-to the visitor. To change recipients, edit `TO` in the script and deploy a new version. |
 | `bookingUrl` | A Cal.com or Calendly link for every "Book a call" button. Empty = scroll to the form. |
 | `showPrices` | `true` shows the prices on the service chapters and care plans. Off for now. |
 | `showFounders` | `true` shows the founders section, its menu link and the founders in the footer and search data. Off for now. |
@@ -63,5 +63,5 @@ Accessibility and fallbacks: `prefers-reduced-motion` skips the intro and heavy 
 
 ## Before going live
 
-- Connect the form and booking link (above), add privacy and cookie pages, and set the final domain in `site.url`.
+- Connect the booking link (above), add privacy and cookie pages, and set the final domain in `site.url`.
 - When ready, confirm founder bios and prices in `content.js` and switch them back on.

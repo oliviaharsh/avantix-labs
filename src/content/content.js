@@ -7,9 +7,10 @@ export const site = {
   url: 'https://avantixlabs.in/',
   location: 'Birmingham, UK',
   reach: 'Working with businesses across the UK and India.',
-  // Paste a Formspree / Basin / your own endpoint here to make the enquiry form send.
-  // While empty, the form says plainly that nothing was sent.
-  formEndpoint: '',
+  // Where the enquiry form sends: the Google Apps Script in scripts/enquiry-apps-script.gs, attached to
+  // the "Avantix Labs enquiries" Sheet in Harsh's Google account. Each enquiry becomes a row there and
+  // an email to Harsh and Parth. Empty = the form says plainly that nothing was sent.
+  formEndpoint: 'https://script.google.com/macros/s/AKfycbw53oo5OIiUc4V8CXZYgoIJJBkuX2FEejIK6_CKmUt87PCED-dnErPsGpodyl0Ni5jr/exec',
   // Optional: a Cal.com or Calendly link for the "Book a call" buttons. Empty = scroll to the form.
   bookingUrl: '',
   email: '',

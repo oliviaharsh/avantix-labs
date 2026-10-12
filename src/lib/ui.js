@@ -227,8 +227,12 @@ function initForm() {
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true; status.textContent = 'Sending…';
     try {
-      const res = await fetch(site.formEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) });
+      // sent as plain text: Google Apps Script (scripts/enquiry-apps-script.gs) can't answer the
+      // pre-flight check browsers make before a JSON post to another site
+      const res = await fetch(site.formEndpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
       if (!res.ok) throw new Error(String(res.status));
+      const out = await res.json().catch(() => ({}));
+      if (!out.ok) throw new Error(out.error || 'not saved');
       form.reset();
       status.className = 'form__status is-ok';
       status.textContent = `Thanks${data.name ? `, ${data.name.split(' ')[0]}` : ''}. We will reply within one working day.`;
