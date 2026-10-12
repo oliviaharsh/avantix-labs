@@ -1,6 +1,6 @@
 # Avantix Labs website
 
-**Live preview:** https://oliviaharsh.github.io/avantix-labs/ (add `#intro` to replay the intro).
+**Live:** https://avantixlabs.in (add `#intro` to replay the intro). Hosted on GitHub Pages; the domain's DNS is managed at Hostinger.
 Every push to `main` rebuilds and redeploys automatically (`.github/workflows/deploy.yml`).
 
 The studio's own site: a neural "idea" intro, a 3D sculpture of the Avantix mark in the hero, and a live demo for each of the eight services. Theme: **Sculpted Ivory** (ivory, limestone, espresso, bronze; Instrument Serif + Manrope). Logo: the Keystone kit in `src/assets/logo/`.
