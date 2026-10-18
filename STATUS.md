@@ -39,7 +39,7 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 
 ## What's next
 
-1. **https (stuck since 12 Oct)**: GitHub still hasn't issued the certificate; next step is to remove and re-add the custom domain in Pages settings (needs Harsh's OK). Then (check `gh api repos/oliviaharsh/avantix-labs/pages`), switch on "Enforce HTTPS" and test the form on the live domain.
+1. **https (stuck since 12 Oct)**: GitHub still hasn't issued the certificate; next step is to remove and re-add the custom domain in Pages settings (needs Harsh's OK). Once `gh api repos/oliviaharsh/avantix-labs/pages` shows a certificate, switch on "Enforce HTTPS" and test the form on the live domain.
 2. Delete the two test rows in the enquiries Sheet.
 3. Booking link: create a Cal.com/Calendly and set `bookingUrl` so every "Book a call" button opens it.
 4. Privacy and cookie pages (the form collects personal data).
