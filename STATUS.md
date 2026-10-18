@@ -3,7 +3,7 @@
 Read this first in any new chat. It is the single place that says where things stand, for Harsh, Parth and Claude.
 Update it at the end of every working session (newest changes in the log at the bottom), and pull before editing so we don't overwrite each other. This repo is public, so never put passwords or keys here.
 
-_Last updated: 2026-10-12_
+_Last updated: 2026-10-19_
 
 ## What we are building
 
@@ -23,6 +23,7 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 | Enquiry form | Live. Posts to a Google Apps Script → row in Google Sheet **"Avantix Labs enquiries"** (Harsh's Google account, shared with Parth) + email to harshwalia8888@gmail.com and parthmsavaliya0315@gmail.com, reply-to the visitor. Script source: `scripts/enquiry-apps-script.gs` |
 | Brand | Final: **Sculpted Ivory** theme (ivory, limestone, espresso, bronze; Instrument Serif + Manrope) and the **Keystone** logo kit (`src/assets/logo/`). Not to be reopened |
 | Private preview | Claude artifact https://claude.ai/artifact/XPw44EBAHMkKH3ebWks8Tb (single-file copy, private) |
+| Website Playbook (SOP) | https://claude.ai/artifact/QNAtPQ9i8u2A5qW2mpomER (private; share from its Share menu). Source: Harsh's `Website Dev/playbook/website-playbook.html`. The 13-step process, build levels L1–L5, backend/hosting/domain/maps/SEO-GEO guides, 13 website types with what each needs and doesn't |
 | Promo videos | `media/` (Harsh's computer only, not in the repo) (16:9 + 9:16 Reel). **Out of date**: they still show "Book a free 20-minute call" and the Founders link; re-record before posting |
 
 ### The site, in brief
@@ -38,7 +39,7 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 
 ## What's next
 
-1. **https**: once GitHub issues the certificate (check `gh api repos/oliviaharsh/avantix-labs/pages`), switch on "Enforce HTTPS" and test the form on the live domain.
+1. **https (stuck since 12 Oct)**: GitHub still hasn't issued the certificate; next step is to remove and re-add the custom domain in Pages settings (needs Harsh's OK). Then (check `gh api repos/oliviaharsh/avantix-labs/pages`), switch on "Enforce HTTPS" and test the form on the live domain.
 2. Delete the two test rows in the enquiries Sheet.
 3. Booking link: create a Cal.com/Calendly and set `bookingUrl` so every "Book a call" button opens it.
 4. Privacy and cookie pages (the form collects personal data).
@@ -53,3 +54,4 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 - **2026-10-11**: Parth added to the GitHub repo.
 - **2026-10-12**: Status file moved into the repo so Parth can read and update it too.
 - **2026-10-12**: Moved to avantixlabs.in (DNS set at Hostinger, live over http; certificate pending). Enquiry form connected to Google Sheets + email for Harsh and Parth. Hosting options compared (Hostinger web apps vs Railway vs VPS). This status file created.
+- **2026-10-19**: Website Playbook (SOP + website-type catalogue) published as a private artifact. https certificate still not issued.
