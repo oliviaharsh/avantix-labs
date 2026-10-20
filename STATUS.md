@@ -39,13 +39,12 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 
 ## What's next
 
-1. Delete the two test rows in the enquiries Sheet.
-2. Booking link: create a Cal.com/Calendly and set `bookingUrl` so every "Book a call" button opens it.
-3. Privacy and cookie pages (the form collects personal data).
-4. Business email such as hello@avantixlabs.in on Hostinger (optional; enquiries currently go to Gmail).
-5. When ready: confirm founder bios and prices, then switch `showFounders` / `showPrices` back on.
-6. Re-record the promo videos from the new site.
-7. More server apps: choose Railway or a VPS, then move apps off Hostinger's full web-app slots.
+1. Booking link: create a Cal.com/Calendly and set `bookingUrl` so every "Book a call" button opens it.
+2. Privacy and cookie pages (the form collects personal data).
+3. Business email such as hello@avantixlabs.in on Hostinger (optional; enquiries currently go to Gmail).
+4. When ready: confirm founder bios and prices, then switch `showFounders` / `showPrices` back on.
+5. Re-record the promo videos from the new site.
+6. More server apps: choose Railway or a VPS, then move apps off Hostinger's full web-app slots.
 
 ## Log
 - **2026-10-06/07**: Brand themes → Sculpted Ivory chosen; Keystone logo kit; full 3D site built and deployed to GitHub Pages; promo videos recorded.
@@ -55,3 +54,4 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 - **2026-10-12**: Moved to avantixlabs.in (DNS set at Hostinger, live over http; certificate pending). Enquiry form connected to Google Sheets + email for Harsh and Parth. Hosting options compared (Hostinger web apps vs Railway vs VPS). This status file created.
 - **2026-10-19**: Website Playbook (SOP + website-type catalogue) published as a private artifact. https certificate still not issued.
 - **2026-10-20**: https fixed: the certificate had stalled since 12 Oct; removing and re-adding the custom domain triggered it within a minute. HTTPS now enforced.
+- **2026-10-20**: Test rows removed from the enquiries Sheet (now empty, headers kept).
