@@ -42,7 +42,7 @@ export const services = [
     price: 'From £450',
     time: '1–4 weeks',
     demo: 'webdev',
-    demoNote: 'Drag the handle to compare. Fictional clinic, concept redesign.',
+    demoNote: 'Switch tabs, drag to compare. Six fictional businesses, concept redesigns.',
     tone: 'light',
   },
   {

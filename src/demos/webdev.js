@@ -1,62 +1,65 @@
-// 01 Web development: drag between a dated clinic website and our redesign of it (fictional business).
-import clinicImg from '../assets/demo/clinic.webp';
+// 01 Web development: six client sites (fictional businesses), each before and after our redesign.
+// Browser tabs switch between them and the handle compares old and new. Until the visitor touches it,
+// the demo tours the sites by itself.
+import { clients } from './webdev-sites.js';
+import './webdev-sites.css';
+import '@fontsource-variable/fraunces/wght.css';
+import '@fontsource-variable/fraunces/wght-italic.css';
+import '@fontsource-variable/cormorant/wght.css';
+import '@fontsource-variable/cormorant/wght-italic.css';
+import '@fontsource-variable/bodoni-moda/wght.css';
+import '@fontsource-variable/bodoni-moda/wght-italic.css';
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/newsreader/wght.css';
+import '@fontsource-variable/newsreader/wght-italic.css';
 
 const DESIGN_W = 1200;
+const TOUR_MS = 7000;
+const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
 
-const before = () => `
-<div class="old">
-  <div class="old__top">
-    <div class="old__logo">Harbour Lane Physio</div>
-    <div class="old__phone">CALL US TO BOOK!!<small>Mon–Fri 9am–5pm (closed lunch)</small></div>
-  </div>
-  <div class="old__nav"><a>Home</a><a>About Us</a><a>Prices (PDF)</a><a>Directions</a><a>Contact</a><a>Links</a></div>
-  <div class="old__marquee"><span>*** WELCOME TO OUR NEW WEBSITE *** Online booking coming soon!! *** Please phone to make an appointment ***</span></div>
-  <div class="old__body">
-    <div class="old__side">
-      <p class="old__h4">Quick Links</p>
-      <ul style="padding-left:18px;margin:0"><li>Back Pain</li><li>Sports Injury</li><li>Download Price List (PDF, 4MB)</li><li>Find Us</li><li>Guestbook</li></ul>
-      <p style="margin-top:18px">You are visitor number <span class="old__counter">004187</span></p>
-    </div>
-    <div class="old__main">
-      <p class="old__h1">Welcome to Harbour Lane Physiotherapy!</p>
-      <div class="old__img" style="background-image:url(${clinicImg})"></div>
-      <p>We are a physiotherapy practice. We treat many conditions including back pain, neck pain, sports injuries and much more. Our physiotherapists are fully qualified.</p>
-      <p>To book an appointment please telephone the clinic during opening hours. If the line is busy please try again later or leave a message and we will try to call you back.</p>
-      <p>Prices are available in our downloadable price list.</p>
-      <span class="old__cta">☎ PHONE NOW TO BOOK</span>
-    </div>
-  </div>
-  <div class="old__foot"><span>© Harbour Lane Physio. Best viewed in Internet Explorer at 1024x768.</span><span>Last updated: March 2014</span></div>
-</div>`;
+// A site's photo and fonts, each fetched once. Fonts only download when a site is about to be shown:
+// every font that arrives makes the page's split headings re-measure, so none should land mid-scroll.
+const loads = new Map();
+const once = (key, fn) => { if (!loads.has(key)) loads.set(key, fn()); return loads.get(key); };
+const loadImage = (c) => once(`img:${c.id}`, () => { const img = new Image(); img.src = c.img; return img.decode().catch(() => {}); });
+const loadFonts = (c) => once(`font:${c.id}`, () => Promise.all(c.fonts.map((f) => document.fonts.load(f).catch(() => {}))));
+const prepare = (c) => Promise.all([loadImage(c), loadFonts(c)]);
 
-const after = () => `
-<div class="new">
-  <div class="new__nav">
-    <div class="new__brand"><i></i>Harbour Lane</div>
-    <div class="new__links"><span>Treatments</span><span>Prices</span><span>Our team</span><span>Find us</span></div>
-    <span class="new__book">Book online</span>
-  </div>
-  <div class="new__hero">
-    <div>
-      <p class="new__eyebrow">Physiotherapy · Moseley, Birmingham</p>
-      <h2 class="new__h1">Move without<br/> pain <em>again.</em></h2>
-      <p class="new__p">Assessment, hands-on treatment and a plan you can follow at home. Book a time that suits you in under a minute.</p>
-      <div class="new__ctas"><span>Book online</span><span>Free 15-minute call</span></div>
-      <div class="new__proof"><span class="new__stars">★★★★★</span><span>4.9 from 212 Google reviews</span></div>
-    </div>
-    <div class="new__img" style="background-image:url(${clinicImg})">
-      <div class="new__chip"><small>NEXT AVAILABLE</small><b>Tomorrow, 9:30</b><span>Initial assessment · £60</span></div>
-    </div>
-  </div>
-</div>`;
+const icon = {
+  back: '<svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  fwd: '<svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  reload: '<svg viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  lock: '<svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="4.5" width="7" height="5" rx="1" fill="currentColor"/><path d="M3 4.5V3a2 2 0 0 1 4 0v1.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>',
+};
+
+const notesHtml = (c) => c.notes.map((n, i) => `<span class="wd__note"><b>0${i + 1}</b> ${n}</span>`).join('');
 
 export function mount(stage) {
+  const first = clients[0];
   stage.innerHTML = `
-  <div class="frame wd">
-    <div class="frame__bar"><i></i><i></i><i></i><div class="frame__url">harbourlanephysio.co.uk</div></div>
-    <div class="wd__view" data-view>
-      <div class="wd__site wd__after" data-site>${after()}</div>
-      <div class="wd__site wd__before" data-site data-before>${before()}</div>
+  <div class="frame wd" style="--tour:${TOUR_MS}ms">
+    <div class="wd__chrome">
+      <div class="wd__tabs">
+        <span class="wd__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="wd__strip" role="tablist" aria-label="Client websites" data-strip>
+          ${clients.map((c, i) => `
+          <button class="wd__tab" type="button" role="tab" id="wd-tab-${c.id}" aria-controls="wd-view" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-tab>
+            <span class="wd__fav" style="--fav:${c.fav}" aria-hidden="true">${c.initial}</span>
+            <span class="wd__tabname">${c.kind}<small> · ${c.name}</small></span>
+            <i class="wd__prog" aria-hidden="true"></i>
+          </button>`).join('')}
+        </div>
+      </div>
+      <div class="frame__bar wd__bar">
+        <span class="wd__navic" aria-hidden="true">${icon.back}${icon.fwd}${icon.reload}</span>
+        <div class="frame__url">${icon.lock}<span data-url>${first.url}</span></div>
+      </div>
+    </div>
+    <div class="wd__view" id="wd-view" role="tabpanel" aria-labelledby="wd-tab-${first.id}" data-view>
+      <div class="wd__site wd__after" data-site data-after>${first.after()}</div>
+      <div class="wd__site wd__before" data-site data-before>${first.before()}</div>
       <span class="wd__label wd__label--b">Before</span>
       <span class="wd__label wd__label--a">After</span>
       <div class="wd__handle" data-handle role="slider" tabindex="0" aria-label="Compare the old and new website" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" data-cursor="Drag">
@@ -64,17 +67,20 @@ export function mount(stage) {
       </div>
     </div>
   </div>
-  <div class="wd__notes">
-    <span class="wd__note"><b>01</b> Book online in two taps</span>
-    <span class="wd__note"><b>02</b> Prices and reviews up front</span>
-    <span class="wd__note"><b>03</b> Built mobile-first and fast</span>
-  </div>`;
+  <div class="wd__notes" data-notes>${notesHtml(first)}</div>`;
 
+  const frame = stage.querySelector('.wd');
   const view = stage.querySelector('[data-view]');
   const sites = stage.querySelectorAll('[data-site]');
+  const afterEl = stage.querySelector('[data-after]');
   const beforeEl = stage.querySelector('[data-before]');
   const handle = stage.querySelector('[data-handle]');
-  let pct = 50, target = 50, raf = 0, auto = true;
+  const strip = stage.querySelector('[data-strip]');
+  const tabs = [...stage.querySelectorAll('[data-tab]')];
+  const urlEl = stage.querySelector('[data-url]');
+  const notesEl = stage.querySelector('[data-notes]');
+  let pct = 50, target = 50, raf = 0;
+  let auto = true; // false once the visitor drags the handle or picks a tab themselves
 
   const fit = () => {
     const s = view.clientWidth / DESIGN_W;
@@ -96,28 +102,104 @@ export function mount(stage) {
   const go = (v) => { target = Math.max(0, Math.min(100, v)); if (!raf) raf = requestAnimationFrame(tick); };
   apply();
 
+  // a slow sweep across each site, so the before and after both get seen
+  let timers = [];
+  const sweep = () => {
+    timers.forEach(clearTimeout);
+    timers = [[500, 80], [1700, 20], [2900, 50]].map(([t, v]) => setTimeout(() => auto && go(v), t));
+  };
+
+  // the visitor has taken over: stop the tour and the sweeps
+  const takeOver = () => {
+    auto = false;
+    frame.classList.remove('is-touring');
+    timers.forEach(clearTimeout);
+  };
+
   // drag anywhere on the view
   let dragging = false;
   const fromEvent = (e) => { const r = view.getBoundingClientRect(); return ((e.clientX - r.left) / r.width) * 100; };
-  view.addEventListener('pointerdown', (e) => { dragging = true; auto = false; view.setPointerCapture(e.pointerId); go(fromEvent(e)); });
+  view.addEventListener('pointerdown', (e) => { dragging = true; takeOver(); view.setPointerCapture(e.pointerId); go(fromEvent(e)); });
   view.addEventListener('pointermove', (e) => { if (dragging) go(fromEvent(e)); });
   view.addEventListener('pointerup', () => { dragging = false; });
   view.addEventListener('pointercancel', () => { dragging = false; });
   handle.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { auto = false; go(target - 5); e.preventDefault(); }
-    if (e.key === 'ArrowRight') { auto = false; go(target + 5); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { takeOver(); go(target - 5); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { takeOver(); go(target + 5); e.preventDefault(); }
   });
 
-  // a gentle invitation: sweep once when first seen
-  let swept = false;
+  // switching sites
+  let current = 0, token = 0;
+  const keepInView = (tab) => {
+    const l = tab.offsetLeft, r = l + tab.offsetWidth;
+    if (l < strip.scrollLeft) strip.scrollTo({ left: l - 8, behavior: 'smooth' });
+    else if (r > strip.scrollLeft + strip.clientWidth) strip.scrollTo({ left: r - strip.clientWidth + 8, behavior: 'smooth' });
+  };
+  async function select(i) {
+    if (i === current) return;
+    current = i;
+    const c = clients[i], mine = ++token;
+    tabs.forEach((t, j) => { t.setAttribute('aria-selected', String(j === i)); t.tabIndex = j === i ? 0 : -1; });
+    keepInView(tabs[i]);
+    urlEl.textContent = c.url;
+    view.setAttribute('aria-labelledby', tabs[i].id);
+    timers.forEach(clearTimeout);
+    view.classList.add('is-switching');
+    // wait for the fade, the photo and the fonts (but never long), so the new site appears whole
+    await Promise.all([wait(200), Promise.race([prepare(c), wait(900)])]);
+    if (mine !== token) return;
+    afterEl.innerHTML = c.after();
+    beforeEl.innerHTML = c.before();
+    notesEl.innerHTML = notesHtml(c);
+    pct = target = 50;
+    apply();
+    view.classList.remove('is-switching');
+    if (auto && !reduce()) sweep();
+    if (frame.classList.contains('is-touring')) prepare(clients[(i + 1) % clients.length]);
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => { takeOver(); select(i); });
+    // start fetching a site as soon as the pointer heads for its tab
+    tab.addEventListener('pointerenter', () => prepare(clients[i]));
+  });
+  strip.addEventListener('keydown', (e) => {
+    const n = clients.length;
+    const to = { ArrowRight: current + 1, ArrowLeft: current - 1 + n, Home: 0, End: n - 1 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    takeOver();
+    select(to % n);
+    tabs[to % n].focus();
+  });
+
+  // the tour: when the open tab's progress bar fills, move to the next site
+  strip.addEventListener('animationend', (e) => {
+    if (e.animationName === 'wdtour' && frame.classList.contains('is-touring')) select((current + 1) % clients.length);
+  });
+
+  // fetch the other sites' photos quietly once this demo has been seen (not on data-saver connections)
+  const warmAll = () => {
+    if (navigator.connection?.saveData) return;
+    let k = 0;
+    const step = () => { const c = clients[k++]; if (c) idle(() => loadImage(c).then(step), { timeout: 4000 }); };
+    step();
+  };
+
+  frame.classList.add('is-paused');
+  let seen = false;
   return {
     resume() {
-      if (swept || !auto || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      swept = true;
-      setTimeout(() => auto && go(78), 500);
-      setTimeout(() => auto && go(22), 1500);
-      setTimeout(() => auto && go(50), 2500);
+      frame.classList.remove('is-paused');
+      if (seen) return;
+      seen = true;
+      if (reduce()) return;
+      sweep();
+      frame.classList.add('is-touring');
+      setTimeout(warmAll, 2500);
+      // the tour's next stop, in good time for its turn
+      setTimeout(() => frame.classList.contains('is-touring') && !frame.classList.contains('is-paused') && prepare(clients[1]), 4000);
     },
-    pause() {},
+    pause() { frame.classList.add('is-paused'); },
   };
 }

@@ -3,7 +3,7 @@
 Read this first in any new chat. It is the single place that says where things stand, for Harsh, Parth and Claude.
 Update it at the end of every working session (newest changes in the log at the bottom), and pull before editing so we don't overwrite each other. This repo is public, so never put passwords or keys here.
 
-_Last updated: 2026-10-20_
+_Last updated: 2026-10-21_
 
 ## What we are building
 
@@ -29,7 +29,7 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 ### The site, in brief
 - Neural-brain intro → 3D Avantix sculpture hero → 8 service chapters, each with a live demo → process → enquiry form.
 - All words live in `src/content/content.js`. Switches there: `showPrices` (off), `showFounders` (off), `formEndpoint`, `bookingUrl` (empty), `url`.
-- Demos are fictional businesses: physio clinic (web), bookshelf speaker (3D), clinic agent, care agency rota, Jaipur textile exporter (export). **No flange content anywhere.**
+- Demos are fictional businesses: six client sites in the web chapter (physio clinic, café, cocktail bar, hair salon, garage, financial planner; each an old "before" site and our redesign, switched by browser tabs and touring by itself), bookshelf speaker (3D), clinic agent, care agency rota, Jaipur textile exporter (export). Business names were checked against real firms; phone numbers use Ofcom's drama ranges. **No flange content anywhere.**
 - Performance rules (after fixing lag on 2026-10-07): keep 3D within them (see `README.md` → Performance). Hero ~60 fps on Harsh's Intel Iris Xe laptop.
 
 ### Hosting decisions
@@ -57,3 +57,4 @@ Our own website has to be the most premium, 3D site we can make, because it doub
 - **2026-10-20**: https fixed: the certificate had stalled since 12 Oct; removing and re-adding the custom domain triggered it within a minute. HTTPS now enforced.
 - **2026-10-20**: Test rows removed from the enquiries Sheet (now empty, headers kept).
 - **2026-10-20**: Bug sweep of the live site (desktop, phone, reduced motion, no WebGL, deep links, all nav links, every demo, the form with sending blocked). Fixed: hero stretched after a window resize; a second H1 from the web-design demo; tilt warnings; form error pointing to a non-existent email. Added sitemap.xml, robots.txt with sitemap, branded 404 page, fuller manifest.
+- **2026-10-21**: Web design demo grew from one site to six: Harbour Lane (physio), Ember & Oat (café, Kings Heath), The Copper Moth (cocktail bar, Jewellery Quarter), Juniper Row (hair salon, Harborne), Pryor & Daughters (garage, Acocks Green), Ashby Rowe (financial planner, Edgbaston). Each has its own photo, fonts and colours. Browser tabs switch sites; the demo tours them by itself until touched. Scroll still ~58 fps.

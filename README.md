@@ -51,12 +51,13 @@ The site is tuned to stay at 60 fps on an ordinary laptop (measured on Intel Iri
 - **No freezes on load or scroll**: shaders compile in the background (`renderer.compileAsync`, and `compileComposer` for the intro's bloom chain), so the page keeps running. The intro waits on a loading bar until they are ready (about a second on a first visit, much less after).
 - **Lighting**: the studio environment used by the hero and the speaker is pre-filtered once and stored as `src/assets/env/room-env.bin.gz` (40 KB). After a three.js upgrade, re-bake it: run `npm run dev`, open `/scripts/bake-env.html` and save the download over that file.
 - **Demos**: see the table above. 3D demos run only while visible.
+- **Client-site fonts** (web design demo): each site's font downloads only when that site is about to be shown, never while the visitor scrolls past. Every font that arrives makes the split headings re-measure, which costs a frame or two.
 
 Accessibility and fallbacks: `prefers-reduced-motion` skips the intro and heavy motion; no WebGL falls back to static backgrounds; demos work with mouse, touch and keyboard.
 
 ## Assets and credits
 
-- Fonts: Instrument Serif and Manrope (SIL Open Font License), self-hosted via Fontsource.
+- Fonts: Instrument Serif and Manrope (SIL Open Font License), self-hosted via Fontsource. The client sites in the web design demo also use Fraunces, Cormorant, Bodoni Moda, Archivo and Newsreader (all SIL Open Font License, Fontsource).
 - Globe land data: Natural Earth 1:110m (public domain), converted by `scripts/land-mask.mjs`.
 - Demo photos (`src/assets/demo/`): generated for this site, used only inside the fictional mockups.
 - Lighting environment: three.js `RoomEnvironment` (MIT), pre-filtered by `scripts/bake-env.html`.
