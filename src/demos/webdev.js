@@ -13,12 +13,12 @@ const before = () => `
   <div class="old__marquee"><span>*** WELCOME TO OUR NEW WEBSITE *** Online booking coming soon!! *** Please phone to make an appointment ***</span></div>
   <div class="old__body">
     <div class="old__side">
-      <h4>Quick Links</h4>
+      <p class="old__h4">Quick Links</p>
       <ul style="padding-left:18px;margin:0"><li>Back Pain</li><li>Sports Injury</li><li>Download Price List (PDF, 4MB)</li><li>Find Us</li><li>Guestbook</li></ul>
       <p style="margin-top:18px">You are visitor number <span class="old__counter">004187</span></p>
     </div>
     <div class="old__main">
-      <h1>Welcome to Harbour Lane Physiotherapy!</h1>
+      <p class="old__h1">Welcome to Harbour Lane Physiotherapy!</p>
       <div class="old__img" style="background-image:url(${clinicImg})"></div>
       <p>We are a physiotherapy practice. We treat many conditions including back pain, neck pain, sports injuries and much more. Our physiotherapists are fully qualified.</p>
       <p>To book an appointment please telephone the clinic during opening hours. If the line is busy please try again later or leave a message and we will try to call you back.</p>

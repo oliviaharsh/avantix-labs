@@ -236,7 +236,8 @@ export function createHero(canvas) {
     camera.aspect = cssW / cssH;
     camera.updateProjectionMatrix();
   }
-  addEventListener('resize', resize);
+  // watch the canvas itself: on a window resize the pinned hero only gets its new height a moment later
+  new ResizeObserver(() => resize()).observe(canvas);
 
   let active = false, started = false, ready = false, time = 0;
   const io = new IntersectionObserver(([e]) => { active = e.isIntersecting; if (!active) governor.pause(); }, { threshold: 0 });

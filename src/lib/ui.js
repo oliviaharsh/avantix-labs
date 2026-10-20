@@ -156,7 +156,7 @@ function initProcess() {
       x: () => -dist(), ease: 'none',
       scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${dist() + innerHeight * 0.4}`, pin: true, scrub: 0.8, invalidateOnRefresh: true },
     });
-    gsap.from(track.querySelectorAll('.step'), { rotateY: -18, opacity: 0.2, transformOrigin: 'left center', stagger: 0.12, duration: 1, ease: 'power2.out', scrollTrigger: { trigger: section, start: 'top 70%', once: true } });
+    gsap.from(track.querySelectorAll('.step'), { rotationY: -18, opacity: 0.2, transformOrigin: 'left center', stagger: 0.12, duration: 1, ease: 'power2.out', scrollTrigger: { trigger: section, start: 'top 70%', once: true } });
   });
   mm.add('(max-width: 900px)', () => {
     track.style.width = 'auto';
@@ -172,15 +172,15 @@ function initTilt() {
   $$('.chapter__demo [data-demo-stage]').forEach((stage) => {
     const flip = stage.closest('.chapter--flip');
     gsap.fromTo(stage,
-      { rotateX: 16, rotateY: flip ? 14 : -14, y: 80, z: -120, opacity: 0.35 },
-      { rotateX: 0, rotateY: 0, y: 0, z: 0, opacity: 1, ease: 'power2.out', scrollTrigger: { trigger: stage, start: 'top 95%', end: 'top 35%', scrub: 0.9 } });
+      { rotationX: 16, rotationY: flip ? 14 : -14, y: 80, z: -120, opacity: 0.35 },
+      { rotationX: 0, rotationY: 0, y: 0, z: 0, opacity: 1, ease: 'power2.out', scrollTrigger: { trigger: stage, start: 'top 95%', end: 'top 35%', scrub: 0.9 } });
   });
   if (!fine()) return;
   $$('[data-tilt]').forEach((el) => {
     const target = el.matches('.chapter__demo') ? el.querySelector('[data-demo-stage]') : el;
     const inner = target.matches('[data-demo-stage]') ? target.firstElementChild || target : target;
-    const rx = gsap.quickTo(inner, 'rotateX', { duration: 0.8, ease: 'power3' });
-    const ry = gsap.quickTo(inner, 'rotateY', { duration: 0.8, ease: 'power3' });
+    const rx = gsap.quickTo(inner, 'rotationX', { duration: 0.8, ease: 'power3' });
+    const ry = gsap.quickTo(inner, 'rotationY', { duration: 0.8, ease: 'power3' });
     el.addEventListener('pointermove', (e) => {
       if (e.target.closest('[data-notilt]')) return;
       const r = el.getBoundingClientRect();
@@ -238,7 +238,7 @@ function initForm() {
       status.textContent = `Thanks${data.name ? `, ${data.name.split(' ')[0]}` : ''}. We will reply within one working day.`;
     } catch (err) {
       status.className = 'form__status';
-      status.textContent = 'That did not send. Please try again, or email us directly.';
+      status.textContent = 'That did not send, sorry. Please check your connection and try again in a moment.';
     } finally { btn.disabled = false; }
   });
 }

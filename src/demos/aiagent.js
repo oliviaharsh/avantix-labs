@@ -46,8 +46,8 @@ export function mount(stage) {
       </div>
     </div>
     <div class="ag__side">
-      <div class="ag__panel"><h4>Behind the scenes</h4><div class="ag__trace" data-trace><p>Waiting for a question…</p></div></div>
-      <div class="ag__panel"><h4>Timesheet</h4>
+      <div class="ag__panel"><p class="ag__label">Behind the scenes</p><div class="ag__trace" data-trace><p>Waiting for a question…</p></div></div>
+      <div class="ag__panel"><p class="ag__label">Timesheet</p>
         <div class="ag__sheet">
           <span>Hours</span><span>00:00–24:00</span>
           <span>Days</span><span>Mon–Sun</span>

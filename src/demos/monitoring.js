@@ -15,29 +15,29 @@ export function mount(stage) {
     </div>
     <div class="mn__grid">
       <div class="mn__card mn__w4">
-        <h5><span>Response time</span><span data-rt-now>—</span></h5>
+        <p class="mn__label"><span>Response time</span><span data-rt-now>—</span></p>
         <svg class="mn__spark" viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true"><path data-area d=""/><polyline data-line points=""/></svg>
       </div>
       <div class="mn__card mn__w2">
-        <h5><span>Uptime</span><span>60 days</span></h5>
+        <p class="mn__label"><span>Uptime</span><span>60 days</span></p>
         <p class="mn__big" data-uptime>99.98<small>%</small></p>
         <div class="mn__bars" data-bars>${bars.map((c) => `<i class="${c}"></i>`).join('')}</div>
       </div>
       <div class="mn__card mn__w2">
-        <h5><span>SSL certificate</span></h5>
+        <p class="mn__label"><span>SSL certificate</span></p>
         <p class="mn__big">64<small>days left</small></p>
         <p style="font-size:12px;color:var(--muted);margin-top:8px">Renews automatically</p>
       </div>
       <div class="mn__card mn__w2">
-        <h5><span>Backups</span></h5>
+        <p class="mn__label"><span>Backups</span></p>
         <div class="mn__list"><div><span>Today 03:00</span><span>412 MB ✓</span></div><div><span>Yesterday</span><span>411 MB ✓</span></div><div><span>Restore test</span><span>Passed</span></div></div>
       </div>
       <div class="mn__card mn__w2">
-        <h5><span>Core Web Vitals</span><span class="tag tag--ok">Good</span></h5>
+        <p class="mn__label"><span>Core Web Vitals</span><span class="tag tag--ok">Good</span></p>
         <div class="mn__vitals"><div class="mn__vital"><b>1.6s</b><small>LCP</small></div><div class="mn__vital"><b>110ms</b><small>INP</small></div><div class="mn__vital"><b>0.02</b><small>CLS</small></div></div>
       </div>
       <div class="mn__card mn__w6">
-        <h5><span>Activity</span><span>Live</span></h5>
+        <p class="mn__label"><span>Activity</span><span>Live</span></p>
         <div class="mn__feed" data-feed aria-live="polite">
           <p>03:00 · <b>Backup completed</b> and verified (412 MB)</p>
           <p>03:04 · <b>3 security updates</b> applied, site checked after each one</p>
